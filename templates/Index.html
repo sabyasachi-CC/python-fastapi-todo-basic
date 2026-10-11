@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Tasks</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #f3f3ff;
+        margin: 0;
+        padding: 0;
+    }
+    header {
+        padding: 20px;
+        text-align: center;
+    }
+    header h1 {
+        font-weight: 700;
+        color: #4b00ff;
+    }
+    .tasks-container {
+        max-width: 600px;
+        margin: 20px auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .task-card {
+        padding: 15px;
+        border-radius: 16px;
+        color: #fff;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .task-card.yellow { background: #e5c9e1ff; color: #000; }
+    .task-card.purple { background: #A020F0; }
+    .task-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    .task-desc {
+        margin-top: 5px;
+        font-size: 0.9rem;
+    }
+    .task-actions {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        gap: 5px;
+    }
+    .task-actions button {
+        background: rgba(255,255,255,0.3);
+        border: none;
+        padding: 5px 8px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .add-task-btn {
+        display: block;
+        max-width: 200px;
+        margin: 30px auto;
+        background: #A020F0;
+        color: #fff;
+        text-align: center;
+        padding: 12px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: transform 0.2s ease;
+    }
+    .add-task-btn:hover {
+        transform: scale(1.05);
+    }
+
+    /* User Info (Top Right) */
+    .user-info {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 10px 18px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        color: #333;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .user-info button {
+        background: #A020F0;
+        color: #fff;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .user-info button:hover {
+        transform: scale(1.05);
+        background: #8a1ad8;
+    }
+
+    /* Hero Section */
+    .hero { 
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+        padding: 1.25rem 1rem; 
+        border-radius: 14px; 
+        background: #f6f7fb; 
+    }
+    .hero h1 { margin: 0 0 .25rem; font-size: 1.8rem; }
+    .hero p  { margin: 0; color: #444; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1 id="greeting">👋 Hello</h1>
+  <p id="subtext">Make today count!</p>
+</header>
+
+<div class="user-info">
+    {% if user %}
+    <span>Logged in as {{ user.username }}</span>
+    <a href="/logout"><button>Logout</button></a>
+    {% endif %}
+</div>
+
+<div class="tasks-container">
+    {% for task in tasks %}
+    <div class="task-card {{ loop.index % 2 == 0 and 'purple' or 'yellow' }}">
+        <div class="task-title">{{ task.title }}</div>
+        <div class="task-desc">{{ task.description if task.description else '' }}</div>
+        <div class="task-actions">
+            <button onclick="editTask({{ task.id }})">✏️</button>
+            <form method="post" action="/tasks/{{ task.id }}/delete" style="display:inline;">
+                <button type="submit">🗑️</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<a href="/add-task" class="add-task-btn">+ Add New Task</a>
+
+<script>
+  // Greeting Logic
+ function getGreetingParts(date = new Date()) {
+  const h = date.getHours();
+  if (h >= 5 && h < 12)   // Morning until 11:59 AM
+      return { text: "Good Morning",  emoji: "🌅", sub: "Fresh start. Let’s get it!" };
+  if (h >= 12 && h < 16)  // 12:00 PM - 3:59 PM
+      return { text: "Good Afternoon", emoji: "🌤️", sub: "Keep up the momentum!" };
+  if (h >= 16 && h < 20)  // 4:00 PM - 7:59 PM
+      return { text: "Good Evening",   emoji: "🌇", sub: "You’re almost there—finish strong!" };
+  return { text: "Good Night", emoji: "🌙", sub: "Wrap up and recharge for tomorrow." };
+}
+
+function updateGreeting() {
+  const { text, emoji, sub } = getGreetingParts();
+  document.getElementById("greeting").innerHTML = `${emoji} ${text}`;
+  document.getElementById("subtext").innerText = sub;
+}
+
+
+  // Run immediately on page load
+  document.addEventListener("DOMContentLoaded", () => {
+    updateGreeting();
+    setInterval(updateGreeting, 60_000); // update every 1 minute
+  });
+
+  // Task Editing
+  function editTask(taskId) {
+    const newTitle = prompt("Edit Task");
+    if (newTitle) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/tasks/${taskId}/update`;
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'title';
+        input.value = newTitle;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+  }
+</script>
+
+</body>
+</html>

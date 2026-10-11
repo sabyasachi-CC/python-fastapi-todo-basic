@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Task</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #f3f3ff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .add-task-form {
+        background: #fff;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 400px;
+    }
+    .add-task-form h2 {
+        text-align: center;
+        color: #A020F0;
+        margin-bottom: 20px;
+    }
+    .add-task-form input,
+    .add-task-form textarea,
+    .add-task-form select {
+        width: 100%;
+        padding: 10px 15px;
+        margin: 10px 0;
+        border-radius: 12px;
+        border: 1px solid #A020F0;
+        outline: none;
+        font-size: 1rem;
+    }
+    .add-task-form button {
+        width: 100%;
+        background: #A020F0;
+        color: #fff;
+        padding: 12px;
+        font-weight: 600;
+        border: none;
+        border-radius: 50px;
+        margin-top: 10px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    .add-task-form button:hover {
+        transform: scale(1.05);
+    }
+</style>
+</head>
+<body>
+
+<form class="add-task-form" method="post" action="/tasks">
+    <h2>Add New Task</h2>
+    <input type="text" name="title" placeholder="Task Name *" required>
+    <textarea name="description" placeholder="Task Description (optional)" rows="4"></textarea>
+    <input type="datetime-local" name="deadline" placeholder="Task Deadline (optional)">
+    <select name="category">
+        <option value="">Select Category</option>
+        <option value="work">Work</option>
+        <option value="personal">Personal</option>
+    </select>
+    <button type="submit">Create Task</button>
+</form>
+
+</body>
+</html>
